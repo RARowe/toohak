@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>toohak</title>
+</head>
+
+<body>
+    <h1>Waiting for others to join for {{.Name}}...</h1>
+    <ul id="players"></ul>
+</body>
+<data id="player-id">{{.PlayerId}}</data>
+<data id="active-game-id">{{.ActiveGameId}}</data>
+<script>
+    const playerList = document.getElementById('players')
+    var players = []
+
+    const playerId = document.getElementById("player-id").innerText
+    const activeGameId = document.getElementById("active-game-id").innerText
+
+
+    const s = new WebSocket(`ws://0.0.0.0:8080/admin/join/${activeGameId}`);
+    s.onopen = function () {
+        s.send(playerId)
+    }
+    s.onmessage = function(msg) {
+        console.log(msg.data)
+        const jsonMsg = JSON.parse(msg.data)
+        switch (jsonMsg.type) {
+            case 'INIT_GAME':
+                players = jsonMsg.players || []
+                break
+            case 'PLAYERS_ADDED':
+                for (let i = 0; i < jsonMsg.players.length; i++){
+                    players.push(jsonMsg.players[i])
+                }
+                break
+        }
+        updateBoard()
+    }
+
+    function updateBoard() {
+        playerList.innerHTML = ''
+        for (let i = 0; i < players.length; i++) {
+            const p = players[i]
+            const playerEntry = document.createElement('li')
+            playerEntry.innerHTML = `${p.id}: ${p.name} ${p.admin ?'(admin)':''}`
+            playerList.appendChild(playerEntry)
+        }
+    }
+</script>
+
+</html>

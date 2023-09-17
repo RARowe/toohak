@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>toohak</title>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Questions</th>
+            <th>Play?</th>
+        </thead>
+        <tbody>
+            {{ range . }}
+            <tr>
+                <td>{{ .Name }}</td>
+                <td>{{ len .Questions }}</td>
+                <td><button onclick="startGame({{ .Id }})">Start!</button></td>
+            </tr>
+            {{ end }}
+        </tbodY>
+    </table>
+</body>
+<script>
+    function startGame(id) {
+        const req = new XMLHttpRequest()
+        const url = `/admin/start/${id}`
+        req.open('POST', url, true)
+        req.onreadystatechange = function() {
+            if(req.readyState == 4 && req.status == 201) {
+                game = JSON.parse(req.responseText)
+                window.location = `/admin/${game.activeGameId}`
+            }
+        }
+        req.send();
+    }
+</script>
+
+</html>
